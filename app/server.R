@@ -161,29 +161,36 @@ shinyServer(function(input, output) {
     meta <- phacking_meta(yi = meta_data()[[input$y_col]],
                           vi = meta_data()[[input$v_col]],
                           favor_positive = positive())
-    meta$stats |> rename(estimate = mode)
+    meta$stats <- meta$stats |> rename(estimate = mode)
+    meta
+  })
+  
+  mu <- reactive({
+    corrected_model()$stats |> filter(param == "mu")
+  })
+
+  tau <- reactive({
+    corrected_model()$stats |> filter(param == "tau")
   })
   
   output$corrected_mu <- renderUI({
     req(corrected_model())
-    estimate_text("corrected mean (μ)", corrected_model() |> filter(param == "mu"))
+    estimate_text("corrected mean (μ)", mu())
   })
 
   output$corrected_tau <- renderUI({
     req(corrected_model())
-    estimate_text("corrected heterogeneity (τ)", corrected_model() |> filter(param == "tau"))
+    estimate_text("corrected heterogeneity (τ)", tau())
   })
   
   corrected_summary <- reactive({
     req(corrected_model())
     # cm <- corrected_model()
-    mu <- corrected_model() |> filter(param == "mu")
-    tau <- corrected_model() |> filter(param == "tau")
     .str("Accounting for potential <em>p</em>-hacking and publication bias that
           favor affirmative results, the estimated meta-analytic mean (μ) is
-          {ci_text(mu$estimate, mu$ci_lower, mu$ci_upper)} and the estimated standard
-          deviation of the effects, i.e., heterogeneity (τ), is
-          {ci_text(tau$estimate, tau$ci_lower, tau$ci_upper)}.")
+          {ci_text(mu()$estimate, mu()$ci_lower, mu()$ci_upper)} and the
+          estimated standard deviation of the effects, i.e., heterogeneity (τ),
+          is {ci_text(tau()$estimate, tau()$ci_lower, tau()$ci_upper)}.")
   })
   
   output$corrected_summary <- renderUI({
@@ -205,38 +212,36 @@ shinyServer(function(input, output) {
   # qqplot
   # ----------------------------------------------------------------------------
   
-  # funnel_plot <- function() {
-  #   significance_funnel(yi = y_vals(), vi = v_vals(),
-  #                       favor_positive = positive(),
-  #                       est_all = uncorrected_model()$estimate,
-  #                       est_worst = worst_model()$estimate) +
-  #     theme_classic(base_family = "Lato") +
-  #     theme(legend.position = "top",
-  #           legend.title = element_blank())
-  # }
-  # 
-  # fp_res <- 300
-  # fp_width <- 1200
-  # fp_height <- 1100
-  # 
-  # output$funnel <- renderPlot({
-  #   req(uncorrected_model(), worst_model())
-  #   funnel_plot()
-  # }, res = fp_res, height = fp_height, width = fp_width)
-  # 
-  # output$download_funnel <- downloadHandler(
-  #   filename = function() {
-  #     paste0(tools::file_path_sans_ext(input$meta_data$name), "_funnel", ".png")
-  #   },
-  #   content = function(file) {
-  #     ggsave(file, plot = funnel_plot(), device = "png", dpi = fp_res,
-  #            height = fp_height, width = fp_width, units = "px")
-  #   }
-  # )
-  # 
-  # output$download_funnel_button <- renderUI({
-  #   req(uncorrected_model(), worst_model())
-  #   downloadButton("download_funnel")
-  # })
+  qq_plot <- function() {
+    rtma_qqplot(corrected_model()) +
+      theme_classic(base_family = "Lato") +
+      theme(legend.position = "top",
+            legend.title = element_blank())
+  }
+
+  fp_res <- 300
+  fp_width <- 1200
+  fp_height <- 1100
+
+  output$qqplot <- renderPlot({
+    req(corrected_model())
+    qq_plot()
+  }, res = fp_res, height = fp_height, width = fp_width)
+
+  output$download_qqplot <- downloadHandler(
+    filename = function() {
+      # paste0(tools::file_path_sans_ext(input$meta_data$name), "_funnel", ".png")
+      paste0("meat_meta", "_qqplot", ".png")
+    },
+    content = function(file) {
+      ggsave(file, plot = qq_plot(), device = "png", dpi = fp_res,
+             height = fp_height, width = fp_width, units = "px")
+    }
+  )
+
+  output$download_qqplot_button <- renderUI({
+    req(corrected_model())
+    downloadButton("download_qqplot")
+  })
   
 })
