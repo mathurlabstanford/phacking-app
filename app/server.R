@@ -212,7 +212,7 @@ shinyServer(function(input, output) {
   # qqplot
   # ----------------------------------------------------------------------------
   
-  qq_plot <- function() {
+  plot_qqplot <- function() {
     rtma_qqplot(corrected_model()) +
       theme_classic(base_family = "Lato") +
       theme(legend.position = "top",
@@ -225,7 +225,7 @@ shinyServer(function(input, output) {
 
   output$qqplot <- renderPlot({
     req(corrected_model())
-    qq_plot()
+    plot_qqplot()
   }, res = fp_res, height = fp_height, width = fp_width)
 
   output$download_qqplot <- downloadHandler(
@@ -234,7 +234,7 @@ shinyServer(function(input, output) {
       paste0("meat_meta", "_qqplot", ".png")
     },
     content = function(file) {
-      ggsave(file, plot = qq_plot(), device = "png", dpi = fp_res,
+      ggsave(file, plot = plot_qqplot(), device = "png", dpi = fp_res,
              height = fp_height, width = fp_width, units = "px")
     }
   )
@@ -242,6 +242,42 @@ shinyServer(function(input, output) {
   output$download_qqplot_button <- renderUI({
     req(corrected_model())
     downloadButton("download_qqplot")
+  })
+
+  # ----------------------------------------------------------------------------
+  # z_density
+  # ----------------------------------------------------------------------------
+  
+  plot_zdensity <- function() {
+    z_density(y_vals(), v_vals(), crit_color = "#dc322f") +
+      theme_classic(base_family = "Lato")
+      # theme(legend.position = "top",
+      #       legend.title = element_blank())
+  }
+  
+  fp_res <- 300
+  fp_width <- 1200
+  fp_height <- 800
+  
+  output$zdensity <- renderPlot({
+    req(corrected_model())
+    plot_zdensity()
+  }, res = fp_res, height = fp_height, width = fp_width)
+  
+  output$download_zdensity <- downloadHandler(
+    filename = function() {
+      # paste0(tools::file_path_sans_ext(input$meta_data$name), "_funnel", ".png")
+      paste0("meat_meta", "_zdensity", ".png")
+    },
+    content = function(file) {
+      ggsave(file, plot = plot_zdensity(), device = "png", dpi = fp_res,
+             height = fp_height, width = fp_width, units = "px")
+    }
+  )
+  
+  output$download_zdensity_button <- renderUI({
+    req(corrected_model())
+    downloadButton("download_zdensity")
   })
   
 })

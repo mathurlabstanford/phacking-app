@@ -74,16 +74,16 @@ fluidPage(
       )
     ),
 
-    # column(
-    #   width = 4,
-    #   div(
-    #     class = "bs-callout bs-callout-output",
-    #     # div(class = "docs", includeMarkdown("docs/zdensity.md")),
-    #     withSpinner(tagList(
-    #       plotOutput("zdensity", inline = TRUE),
-    #       uiOutput("download_zdensity_button")
-    #     ))
-    #   )
-    # )
+    column(
+      width = 4,
+      div(
+        class = "bs-callout bs-callout-output",
+        div(class = "docs", includeMarkdown("docs/zdensity.md")),
+        withSpinner(tagList(
+          plotOutput("zdensity", inline = TRUE),
+          uiOutput("download_zdensity_button")
+        ))
+      )
+    )
   )
 )
