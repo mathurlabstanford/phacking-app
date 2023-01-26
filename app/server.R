@@ -154,7 +154,8 @@ shinyServer(function(input, output) {
     req(valid_y(), valid_v(), valid_affirm())
     meta <- phacking_meta(yi = meta_data()[[input$y_col]],
                           vi = meta_data()[[input$v_col]],
-                          favor_positive = positive())
+                          favor_positive = positive(),
+                          parallelize = FALSE)
     meta$stats <- meta$stats |> rename(estimate = mode)
     meta
   })
