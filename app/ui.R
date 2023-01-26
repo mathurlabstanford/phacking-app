@@ -8,8 +8,8 @@ library(glue)
 options(spinner.color = "#3498db")
 options(spinner.type = 1)
 
-# tooltips <- yaml::read_yaml("docs/tooltips.yaml")
-# tooltip <- function(tt) bsTooltip(tt, tooltips[[tt]]$text, placement = "top")
+tooltips <- yaml::read_yaml("docs/tooltips.yaml")
+tooltip <- function(tt) bsTooltip(tt, tooltips[[tt]]$text, placement = "top")
 
 fluidPage(
   useShinyFeedback(),
@@ -36,8 +36,8 @@ fluidPage(
       fluidRow(
         column(
           width = 2,
-          fileInput("meta_data", "Upload meta-analysis data (csv)",
-                    accept = ".csv", placeholder = "")
+          # fileInput("meta_data", "Upload meta-analysis data (csv)",
+          #           accept = ".csv", placeholder = "")
         ),
         column(width = 2, uiOutput("y_cols")), tooltip("y_cols"),
         column(width = 2, uiOutput("v_cols")), tooltip("v_cols"),
@@ -54,8 +54,9 @@ fluidPage(
         class = "bs-callout bs-callout-output",
         # div(class = "docs", includeMarkdown("docs/corrected.md")),
         withSpinner(tagList(
-          # uiOutput("uncorrected"),
-          uiOutput("corrected"),
+          uiOutput("uncorrected"),
+          uiOutput("corrected_mu"),
+          uiOutput("corrected_tau"),
           # uiOutput("worst"),
           uiOutput("corrected_summary"),
           uiOutput("clip_corrected"),
@@ -63,28 +64,28 @@ fluidPage(
       )
     ),
     
-    column(
-      width = 4,
-      div(
-        class = "bs-callout bs-callout-output",
-        # div(class = "docs", includeMarkdown("docs/qqplot.md")),
-        withSpinner(tagList(
-          plotOutput("qqplot", inline = TRUE),
-          uiOutput("download_qqplot_button")
-        ))
-      )
-    ),
-    
-    column(
-      width = 4,
-      div(
-        class = "bs-callout bs-callout-output",
-        # div(class = "docs", includeMarkdown("docs/zdensity.md")),
-        withSpinner(tagList(
-          plotOutput("zdensity", inline = TRUE),
-          uiOutput("download_zdensity_button")
-        ))
-      )
-    )
+    # column(
+    #   width = 4,
+    #   div(
+    #     class = "bs-callout bs-callout-output",
+    #     # div(class = "docs", includeMarkdown("docs/qqplot.md")),
+    #     withSpinner(tagList(
+    #       plotOutput("qqplot", inline = TRUE),
+    #       uiOutput("download_qqplot_button")
+    #     ))
+    #   )
+    # ),
+    # 
+    # column(
+    #   width = 4,
+    #   div(
+    #     class = "bs-callout bs-callout-output",
+    #     # div(class = "docs", includeMarkdown("docs/zdensity.md")),
+    #     withSpinner(tagList(
+    #       plotOutput("zdensity", inline = TRUE),
+    #       uiOutput("download_zdensity_button")
+    #     ))
+    #   )
+    # )
   )
 )
