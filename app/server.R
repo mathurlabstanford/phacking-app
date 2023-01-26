@@ -39,21 +39,18 @@ shinyServer(function(input, output) {
   # ----------------------------------------------------------------------------
   
   output$y_cols <- renderUI({
-    # req(input$meta_data)
     req(meta_data_raw())
     selectInput("y_col", "Column of point estimates",
                 choices = c("Select a column" = "", names(meta_data_raw())))
   })
   
   output$v_cols <- renderUI({
-    # req(input$meta_data)
     req(meta_data_raw())
     selectInput("v_col", "Column of estimated variances",
                 choices = c("Select a column" = "", names(meta_data_raw())))
   })
   
   output$directions <- renderUI({
-    # req(input$meta_data, input$v_col)
     req(meta_data_raw())
     selectInput("direction", "Direction",
                 choices = c("favor positive", "favor negative"))
@@ -64,15 +61,12 @@ shinyServer(function(input, output) {
   # ----------------------------------------------------------------------------
   
   meta_data_raw <- reactive({
-    # meta_file <- input$meta_data
-    # read_csv(meta_file$datapath, show_col_types = FALSE)
-    phacking::money_priming_meta
+    req(input$meta_file)
+    read_csv(input$meta_file$datapath, show_col_types = FALSE)
   })
   
   meta_data <- reactive({
-    # req(input$meta_data, input$y_col, input$v_col)
     req(meta_data_raw(), input$y_col, input$v_col)
-    # phacking::money_priming_meta
     meta_data_raw() |>
       filter(!is.na(.data[[input$y_col]]), !is.na(.data[[input$v_col]]))
   })
@@ -168,7 +162,7 @@ shinyServer(function(input, output) {
   mu <- reactive({
     corrected_model()$stats |> filter(param == "mu")
   })
-
+  
   tau <- reactive({
     corrected_model()$stats |> filter(param == "tau")
   })
@@ -177,7 +171,7 @@ shinyServer(function(input, output) {
     req(corrected_model())
     estimate_text("corrected mean (μ)", mu())
   })
-
+  
   output$corrected_tau <- renderUI({
     req(corrected_model())
     estimate_text("corrected heterogeneity (τ)", tau())
@@ -185,7 +179,6 @@ shinyServer(function(input, output) {
   
   corrected_summary <- reactive({
     req(corrected_model())
-    # cm <- corrected_model()
     .str("Accounting for potential <em>p</em>-hacking and publication bias that
           favor affirmative results, the estimated meta-analytic mean (μ) is
           {ci_text(mu()$estimate, mu()$ci_lower, mu()$ci_upper)} and the
@@ -218,32 +211,31 @@ shinyServer(function(input, output) {
       theme(legend.position = "top",
             legend.title = element_blank())
   }
-
+  
   fp_res <- 300
   fp_width <- 1200
   fp_height <- 1100
-
+  
   output$qqplot <- renderPlot({
     req(corrected_model())
     plot_qqplot()
   }, res = fp_res, height = fp_height, width = fp_width)
-
+  
   output$download_qqplot <- downloadHandler(
     filename = function() {
-      # paste0(tools::file_path_sans_ext(input$meta_data$name), "_funnel", ".png")
-      paste0("meat_meta", "_qqplot", ".png")
+      paste0(tools::file_path_sans_ext(input$meta_file$name), "_qqplot", ".png")
     },
     content = function(file) {
       ggsave(file, plot = plot_qqplot(), device = "png", dpi = fp_res,
              height = fp_height, width = fp_width, units = "px")
     }
   )
-
+  
   output$download_qqplot_button <- renderUI({
     req(corrected_model())
     downloadButton("download_qqplot")
   })
-
+  
   # ----------------------------------------------------------------------------
   # z_density
   # ----------------------------------------------------------------------------
@@ -251,8 +243,6 @@ shinyServer(function(input, output) {
   plot_zdensity <- function() {
     z_density(y_vals(), v_vals(), crit_color = "#dc322f") +
       theme_classic(base_family = "Lato")
-      # theme(legend.position = "top",
-      #       legend.title = element_blank())
   }
   
   fp_res <- 300
@@ -266,8 +256,7 @@ shinyServer(function(input, output) {
   
   output$download_zdensity <- downloadHandler(
     filename = function() {
-      # paste0(tools::file_path_sans_ext(input$meta_data$name), "_funnel", ".png")
-      paste0("meat_meta", "_zdensity", ".png")
+      paste0(tools::file_path_sans_ext(input$meta_file$name), "_zdensity", ".png")
     },
     content = function(file) {
       ggsave(file, plot = plot_zdensity(), device = "png", dpi = fp_res,

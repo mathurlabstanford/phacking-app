@@ -35,8 +35,8 @@ fluidPage(
   div(class = "bs-callout bs-callout-input",
       fluidRow(
         column(
-          width = 2,
-          fileInput("meta_data", "Upload meta-analysis data (csv)",
+          width = 3,
+          fileInput("meta_file", "Upload meta-analysis data (csv)",
                     accept = ".csv", placeholder = "")
         ),
         column(width = 2, uiOutput("y_cols")), tooltip("y_cols"),
