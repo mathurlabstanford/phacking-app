@@ -54,6 +54,7 @@ fluidPage(
         div(class = "docs", includeMarkdown("docs/corrected.md")),
         withSpinner(tagList(
           uiOutput("uncorrected"),
+          uiOutput("worst"),
           uiOutput("corrected_mu"),
           uiOutput("corrected_tau"),
           uiOutput("corrected_summary"),

@@ -126,12 +126,10 @@ shinyServer(function(input, output) {
   # phacking_meta
   # ----------------------------------------------------------------------------
   
-  # TODO: include? correct?
   uncorrected_model <- reactive({
     req(valid_y(), valid_v(), valid_affirm())
     robu_formula <- as.formula(glue("{input$y_col} ~ 1"))
     meta_model <- robumeta::robu(robu_formula,
-                                 # studynum = cluster_col(),
                                  studynum = 1:nrow(meta_data()),
                                  data = meta_data(),
                                  var.eff.size = v_vals(),
@@ -144,10 +142,27 @@ shinyServer(function(input, output) {
          "Warning: favored direction is opposite of the pooled estimate.")
     meta_result
   })
-  
+
   output$uncorrected <- renderUI({
     req(uncorrected_model())
     estimate_text("uncorrected", uncorrected_model())
+  })
+  
+  worst_model <- reactive({
+    req(valid_y(), valid_v(), valid_affirm(), corrected_model())
+    robu_formula <- as.formula(glue("{input$y_col} ~ 1"))
+    dnaff <- corrected_model()$data |> filter(!affirm)
+    worst_model <- robumeta::robu(robu_formula,
+                                  studynum = 1:nrow(dnaff),
+                                  data = dnaff,
+                                  var.eff.size = dnaff[[input$v_col]],
+                                  small = TRUE)
+    metabias::robu_ci(worst_model)
+  })
+  
+  output$worst <- renderUI({
+    req(worst_model())
+    estimate_text("worst case", worst_model())
   })
   
   corrected_model <- reactive({
@@ -207,7 +222,9 @@ shinyServer(function(input, output) {
   # ----------------------------------------------------------------------------
   
   plot_qqplot <- function() {
-    rtma_qqplot(corrected_model()) +
+    cm <- corrected_model()
+    cm$values$tcrit <- qnorm(0.975)
+    rtma_qqplot(cm) +
       theme_classic(base_family = "Lato") +
       theme(legend.position = "top",
             legend.title = element_blank())

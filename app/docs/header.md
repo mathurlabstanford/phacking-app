@@ -1,4 +1,4 @@
-This website fits right-truncated meta-analysis (RTMA), a bias correction for the joint effects of _p_-hacking (i.e., manipulation of results within studies to obtain significant, positive estimates) and traditional publication bias (i.e., the selective publication of studies with significant, positive results) in meta-analyses.
+This app fits right-truncated meta-analysis (RTMA), a bias correction for the joint effects of _p_-hacking (i.e., manipulation of results within studies to obtain significant, positive estimates) and traditional publication bias (i.e., the selective publication of studies with significant, positive results) in meta-analyses.
 
 Please use the following citation:
 
